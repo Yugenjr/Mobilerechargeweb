@@ -1,35 +1,86 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { User, Phone, Mail, MapPin, Bell, Moon, LogOut, Edit, Shield } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
+import Loader from '../../components/common/Loader';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
+import axios from 'axios';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [darkMode] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [linkedNumbers, setLinkedNumbers] = useState([]);
 
-  const user = {
-    name: 'John Doe',
-    mobile: '9876543210',
-    email: 'john.doe@example.com',
-    address: 'Mumbai, Maharashtra',
-    memberSince: 'Jan 2023',
-    avatar: 'JD'
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+      
+      const response = await axios.get(`${API_URL}/api/dashboard`, {
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 30000
+      });
+
+      if (response.data.success) {
+        const { user: apiUser, sims } = response.data.data;
+        setUser({
+          name: apiUser.name || storedUser.name || 'User',
+          mobile: apiUser.mobile || sims[0]?.mobileNumber || '',
+          email: apiUser.email || storedUser.email || '',
+          address: 'India',
+          memberSince: 'Dec 2024',
+          avatar: (apiUser.name || 'U').substring(0, 2).toUpperCase()
+        });
+        setLinkedNumbers(sims.map(sim => ({
+          number: sim.mobileNumber,
+          operator: sim.operator,
+          primary: sim.isPrimary
+        })));
+      }
+    } catch (err) {
+      console.error('Failed to fetch profile:', err);
+      // Fallback to localStorage
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      setUser({
+        name: storedUser.name || 'User',
+        mobile: storedUser.mobile || '',
+        email: storedUser.email || '',
+        address: 'India',
+        memberSince: 'Dec 2024',
+        avatar: (storedUser.name || 'U').substring(0, 2).toUpperCase()
+      });
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const linkedNumbers = [
-    { number: '9876543210', operator: 'Jio', primary: true },
-    { number: '8765432109', operator: 'Airtel', primary: false },
-  ];
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <div className="text-white">Unable to load profile</div>;
+  }
 
   return (
     <div className="space-y-6">

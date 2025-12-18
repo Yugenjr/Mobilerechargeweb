@@ -35,9 +35,11 @@ const Dashboard = () => {
 
       if (response.data.success) {
         const { user, currentPlan, usage, sims } = response.data.data;
+        const mobileNumber = user.mobile || (sims && sims.length > 0 ? sims[0].mobileNumber : '');
+        console.log('📱 User mobile:', mobileNumber);
         setUserData({
           name: user.name || 'User',
-          mobile: user.mobile || sims[0]?.mobileNumber || '',
+          mobile: mobileNumber,
           plan: currentPlan?.name || 'No Active Plan',
           dataUsed: usage?.dataUsed || 0,
           dataTotal: usage?.dataTotal || 100,
