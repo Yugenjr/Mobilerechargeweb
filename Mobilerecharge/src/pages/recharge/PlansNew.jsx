@@ -19,54 +19,32 @@ const PlansNew = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchPlans();
-  }, [simId]);
+    if (operator) {
+      fetchPlans();
+    }
+  }, [operator]);
 
   const fetchPlans = async () => {
     try {
       const token = localStorage.getItem('authToken');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
       
-      if (simId) {
-        // Fetch SIM-specific plans
-                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
-        const response = await axios.get(`${API_URL}/api/plans/${simId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (response.data.success) {
-          setPlans(response.data.data);
-        }
+      console.log('📦 Fetching plans for operator:', operator);
+      
+      const response = await axios.get(`${API_URL}/api/plans/${operator}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 30000
+      });
+      
+      if (response.data.success && response.data.data.length > 0) {
+        setPlans(response.data.data);
+        console.log('✅ Fetched', response.data.data.length, 'plans');
       } else {
-        // Use default plans for friend recharge
-        setPlans([
-          {
-            _id: 'default-1',
-            name: 'Basic',
-            price: 199,
-            validity: '28 Days',
-            benefits: { data: '1.5GB/Day', calls: 'Unlimited', sms: '100/Day' },
-            popular: false,
-          },
-          {
-            _id: 'default-2',
-            name: 'Popular',
-            price: 299,
-            validity: '28 Days',
-            benefits: { data: '2GB/Day', calls: 'Unlimited', sms: '100/Day' },
-            popular: true,
-          },
-          {
-            _id: 'default-3',
-            name: 'Premium',
-            price: 599,
-            validity: '84 Days',
-            benefits: { data: '2GB/Day', calls: 'Unlimited', sms: '100/Day' },
-            popular: false,
-          },
-        ]);
+        setError('No plans available for ' + operator);
       }
     } catch (err) {
-      console.error('Failed to fetch plans:', err);
-      setError('Failed to load plans');
+      console.error('❌ Failed to fetch plans:', err);
+      setError('Failed to load plans. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -81,6 +59,9 @@ const PlansNew = () => {
     try {
       const token = localStorage.getItem('authToken');
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+      
+      console.log('💳 Creating recharge payment...');
+      
       const response = await axios.post(`${API_URL}/api/payments/recharge`, {
         simId: rechargeType === 'self' ? simId : null,
         planId: selectedPlan._id,
@@ -88,29 +69,24 @@ const PlansNew = () => {
         rechargeType,
         friendMobile: rechargeType === 'friend' ? phoneNumber : null
       }, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 30000
       });
 
       if (response.data.success) {
+        console.log('✅ Payment successful!');
         navigate('/payment-history', {
           state: {
             success: true,
-            payment: response.data.data,
+            payment: response.data.payment,
             phoneNumber,
-            operator
+            operator,
+            planName: selectedPlan.name
           }
         });
       }
     } catch (err) {
-      console.error('Recharge failed:', err);
-      setError(err.response?.data?.message || 'Recharge failed. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (loading) {
-    return (
+      console.error('❌ Recharge failed:', err);
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <Loader />
       </div>

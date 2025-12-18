@@ -1,59 +1,57 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, Download, Calendar, Filter } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
+import Loader from '../../components/common/Loader';
+import axios from 'axios';
 
 const History = () => {
+  const location = useLocation();
   const [filter, setFilter] = useState('all');
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const paymentSuccess = location.state?.success;
+  const newPayment = location.state?.payment;
 
-  const transactions = [
-    {
-      id: 'TXN1234567890',
-      date: '2025-12-15',
-      amount: 299,
-      type: 'Recharge',
-      status: 'success',
-      mobile: '9876543210',
-      operator: 'Jio'
-    },
-    {
-      id: 'TXN1234567891',
-      date: '2025-12-10',
-      amount: 599,
-      type: 'Recharge',
-      status: 'success',
-      mobile: '9876543210',
-      operator: 'Jio'
-    },
-    {
-      id: 'TXN1234567892',
-      date: '2025-12-05',
-      amount: 239,
-      type: 'Recharge',
-      status: 'failed',
-      mobile: '9876543210',
-      operator: 'Jio'
-    },
-    {
-      id: 'TXN1234567893',
-      date: '2025-11-28',
-      amount: 479,
-      type: 'Recharge',
-      status: 'success',
-      mobile: '9876543210',
-      operator: 'Jio'
-    },
-    {
-      id: 'TXN1234567894',
-      date: '2025-11-15',
-      amount: 299,
-      type: 'Bill Payment',
-      status: 'success',
-      mobile: '9876543210',
-      operator: 'Electricity'
-    },
-  ];
+  useEffect(() => {
+    if (paymentSuccess) {
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 5000);
+    }
+    fetchPaymentHistory();
+  }, []);
+
+  const fetchPaymentHistory = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+      
+      const response = await axios.get(`${API_URL}/api/dashboard`, {
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 30000
+      });
+
+      if (response.data.success) {
+        const payments = response.data.data.recentPayments || [];
+        setTransactions(payments.map(p => ({
+          id: p.transactionId || p.id,
+          date: new Date(p.date).toLocaleDateString(),
+          amount: p.amount,
+          type: p.rechargeType === 'friend' ? 'Friend Recharge' : 'Self Recharge',
+          status: p.status,
+          mobile: p.friendMobile || 'Self',
+          operator: 'Mobile'
+        })));
+      }
+    } catch (err) {
+      console.error('Failed to fetch payment history:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredTransactions = filter === 'all' 
     ? transactions 
@@ -71,8 +69,34 @@ const History = () => {
       : 'bg-red-500/20 text-red-500';
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {showSuccessMessage && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          className="p-4 bg-green-500/10 border border-green-500/30 rounded-xl flex items-center gap-3"
+        >
+          <CheckCircle className="w-6 h-6 text-green-500" />
+          <div>
+            <p className="text-green-400 font-semibold">Payment Successful!</p>
+            <p className="text-sm text-gray-400">
+              ₹{newPayment?.amount} recharged successfully
+              {location.state?.planName && ` - ${location.state.planName}`}
+            </p>
+          </div>
+        </motion.div>
+      )}
+
       <div className="flex items-center justify-between flex-wrap gap-4">
         <h1 className="text-3xl font-bold gradient-text">Payment History</h1>
         <div className="flex gap-2">

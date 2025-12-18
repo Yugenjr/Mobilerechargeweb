@@ -7,8 +7,8 @@ const router = express.Router();
 // GET /api/dashboard - Get user dashboard data (protected)
 router.get('/dashboard', authenticate, getDashboardData);
 
-// GET /api/plans/:simId - Get plans for a SIM (protected)
-router.get('/plans/:simId', authenticate, getPlans);
+// GET /api/plans/:operator - Get plans by operator (protected)
+router.get('/plans/:operator', authenticate, getPlans);
 
 // GET /api/sims/primary - Get user's primary SIM (protected)
 router.get('/sims/primary', authenticate, getPrimarySim);

@@ -96,33 +96,34 @@ export const getDashboardData = async (req, res) => {
 };
 
 /**
- * Get plans for a SIM
- * GET /api/plans/:simId
+ * Get plans by operator
+ * GET /api/plans/:operator
  */
 export const getPlans = async (req, res) => {
   try {
-    const { simId } = req.params;
-    const userId = req.user.userId;
+    const { operator } = req.params;
 
-    // Verify SIM belongs to user
-    const sim = await Sim.findOne({ _id: simId, userId });
-    if (!sim) {
-      return res.status(404).json({
+    // Validate operator
+    if (!['Jio', 'Airtel', 'Vi', 'BSNL'].includes(operator)) {
+      return res.status(400).json({
         success: false,
-        message: 'SIM not found'
+        message: 'Invalid operator'
       });
     }
 
-    const plans = await Plan.find({ simId, isActive: true });
+    const plans = await Plan.find({ operator, isActive: true }).sort({ price: 1 });
 
     res.status(200).json({
       success: true,
-      plans: plans.map(plan => ({
-        id: plan._id,
+      data: plans.map(plan => ({
+        _id: plan._id,
         name: plan.name,
         price: plan.price,
         validity: plan.validity,
-        benefits: plan.benefits
+        benefits: plan.benefits,
+        operator: plan.operator,
+        popular: plan.popular,
+        category: plan.category
       }))
     });
 

@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
 
 const planSchema = new mongoose.Schema({
-  simId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Sim',
+  operator: {
+    type: String,
+    required: true,
+    enum: ['Jio', 'Airtel', 'Vi', 'BSNL'],
     index: true
   },
   name: {
@@ -22,6 +23,15 @@ const planSchema = new mongoose.Schema({
     data: String,
     calls: String,
     sms: String
+  },
+  popular: {
+    type: Boolean,
+    default: false
+  },
+  category: {
+    type: String,
+    enum: ['Popular', 'Data', 'Unlimited', 'Validity'],
+    default: 'Popular'
   },
   isActive: {
     type: Boolean,
