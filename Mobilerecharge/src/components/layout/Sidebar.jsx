@@ -48,9 +48,10 @@ const Sidebar = () => {
         <div className="px-4">
           <motion.div
             whileHover={{ x: 5 }}
-            onClick={() => {
-              logout();
-              navigate('/login');
+            onClick={async () => {
+              console.log('🚪 Logging out from Sidebar...');
+              await logout();
+              navigate('/login', { replace: true });
             }}
             className="flex items-center px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all cursor-pointer"
           >

@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { auth } from '../config/firebase';
+import { signOut } from 'firebase/auth';
 
 const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -27,11 +29,21 @@ const useAuth = () => {
     setUser(userData);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      // Sign out from Firebase
+      await signOut(auth);
+      console.log('✅ Firebase sign-out successful');
+    } catch (error) {
+      console.error('❌ Firebase sign-out error:', error);
+    }
+    
+    // Clear local storage
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
     setIsAuthenticated(false);
     setUser(null);
+    console.log('✅ Logout complete - localStorage cleared');
   };
 
   return {
