@@ -119,7 +119,9 @@ const Dashboard = () => {
             <h2 className="text-2xl font-bold text-white mb-1">
               Hello, {userData.name}! 👋
             </h2>
-            <p className="text-white/80">+91 {userData.mobile}</p>
+            <p className="text-white/80">
+              {userData.mobile ? `+91 ${userData.mobile}` : 'Welcome to RechargeX'}
+            </p>
           </div>
           <div className="text-right">
             <p className="text-sm text-white/80">Balance</p>
