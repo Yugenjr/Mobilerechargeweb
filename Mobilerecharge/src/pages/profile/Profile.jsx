@@ -65,9 +65,10 @@ const Profile = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    console.log('🚪 Logging out from Profile...');
+    await logout();
+    navigate('/login', { replace: true });
   };
 
   if (loading) {
