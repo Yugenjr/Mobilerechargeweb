@@ -4,9 +4,11 @@ import { User, Phone, Mail, MapPin, Bell, Moon, LogOut, Edit, Shield } from 'luc
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import { useNavigate } from 'react-router-dom';
+import useAuth from '../../hooks/useAuth';
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [darkMode] = useState(true);
 
@@ -25,6 +27,7 @@ const Profile = () => {
   ];
 
   const handleLogout = () => {
+    logout();
     navigate('/login');
   };
 

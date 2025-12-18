@@ -1,9 +1,12 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Home, Smartphone, BarChart3, CreditCard, User, LogOut } from 'lucide-react';
+import useAuth from '../../hooks/useAuth';
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const menuItems = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
@@ -43,15 +46,17 @@ const Sidebar = () => {
           })}
         </nav>
         <div className="px-4">
-          <Link to="/login">
-            <motion.div
-              whileHover={{ x: 5 }}
-              className="flex items-center px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all"
-            >
-              <LogOut className="w-5 h-5" />
-              <span className="ml-3 font-medium">Logout</span>
-            </motion.div>
-          </Link>
+          <motion.div
+            whileHover={{ x: 5 }}
+            onClick={() => {
+              logout();
+              navigate('/login');
+            }}
+            className="flex items-center px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all cursor-pointer"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="ml-3 font-medium">Logout</span>
+          </motion.div>
         </div>
       </div>
     </div>
