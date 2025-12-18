@@ -5,6 +5,7 @@ import { Smartphone, ArrowRight } from 'lucide-react';
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import axios from 'axios';
+import { validateSession, updateSessionUser } from '../../utils/sessionManager';
 
 const Onboarding = () => {
   const [mobile, setMobile] = useState('');
@@ -53,10 +54,10 @@ const Onboarding = () => {
       console.log('✅ Update mobile response:', response.data);
       
       if (response.data.success) {
-        // Update stored user info
-        const updatedUser = { ...user, mobile };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        console.log('💾 User info updated in localStorage');
+        // Update session with new mobile info using session manager
+        updateSessionUser({ mobile });
+        console.log('💾 User info updated in session');
+        console.log('✅ Onboarding complete!');
         console.log('🎯 Navigating to dashboard...');
         
         // Navigate to dashboard
@@ -72,7 +73,19 @@ const Onboarding = () => {
         response: err.response?.data,
         status: err.response?.status
       });
-      setError(err.response?.data?.message || 'Failed to update mobile number. Please try again.');
+      
+      // Handle network errors
+      if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
+        setError('Request timed out. Please check your connection and try again.');
+      } else if (err.response?.status === 401) {
+        setError('Session expired. Please login again.');
+        // Clear stale auth
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        setTimeout(() => navigate('/login', { replace: true }), 2000);
+      } else {
+        setError(err.response?.data?.message || 'Failed to update mobile number. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

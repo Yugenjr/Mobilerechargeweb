@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { auth } from '../config/firebase';
 import { signOut } from 'firebase/auth';
+import { validateSession, saveSession, clearSession, getCurrentUser } from '../utils/sessionManager';
 
 const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -12,19 +13,22 @@ const useAuth = () => {
   }, []);
 
   const checkAuth = () => {
-    const token = localStorage.getItem('authToken');
-    const userData = localStorage.getItem('user');
+    // Use session manager for validation
+    const session = validateSession();
     
-    if (token && userData) {
+    if (session.isValid) {
       setIsAuthenticated(true);
-      setUser(JSON.parse(userData));
+      setUser(session.user);
+    } else {
+      setIsAuthenticated(false);
+      setUser(null);
     }
     setLoading(false);
   };
 
   const login = (userData, token) => {
-    localStorage.setItem('authToken', token);
-    localStorage.setItem('user', JSON.stringify(userData));
+    // Use session manager to save
+    saveSession(token, userData);
     setIsAuthenticated(true);
     setUser(userData);
   };
@@ -38,12 +42,11 @@ const useAuth = () => {
       console.error('❌ Firebase sign-out error:', error);
     }
     
-    // Clear local storage
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
+    // Clear session using session manager
+    clearSession();
     setIsAuthenticated(false);
     setUser(null);
-    console.log('✅ Logout complete - localStorage cleared');
+    console.log('✅ Logout complete - session cleared');
   };
 
   return {

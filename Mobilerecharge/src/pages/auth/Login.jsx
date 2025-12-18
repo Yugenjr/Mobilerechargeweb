@@ -6,6 +6,7 @@ import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import { signInWithGoogle, sendOTP, initRecaptcha, clearRecaptcha } from '../../services/authHandlers';
 import { verifyGoogleAuth } from '../../services/api';
+import { validateSession, saveSession } from '../../utils/sessionManager';
 
 const Login = () => {
   const [mobile, setMobile] = useState('');
@@ -18,6 +19,23 @@ const Login = () => {
     console.log('✅ Login component mounted');
     console.log('otpLoading:', otpLoading, 'googleLoading:', googleLoading);
     
+    // Check if already authenticated using session manager
+    const session = validateSession();
+    
+    if (session.isValid) {
+      console.log('🔄 Valid session found');
+      if (session.needsOnboarding) {
+        console.log('⚠️ User needs onboarding, redirecting...');
+        navigate('/onboarding', { replace: true });
+        return;
+      } else {
+        console.log('✅ Session complete, redirecting to dashboard');
+        navigate('/dashboard', { replace: true });
+        return;
+      }
+    }
+    
+    console.log('🔓 No valid session, initializing login...');
     // Initialize reCAPTCHA on mount
     initRecaptcha('recaptcha-container');
     
@@ -25,7 +43,7 @@ const Login = () => {
       // Cleanup on unmount
       clearRecaptcha();
     };
-  }, []);
+  }, [navigate]);
 
   const handleSendOTP = async () => {
     if (mobile.length !== 10) return;
@@ -86,7 +104,9 @@ const Login = () => {
           uid: user.uid,
           mobile: response.user.mobile
         };
-        localStorage.setItem('user', JSON.stringify(userData));
+        
+        // Save session using session manager
+        saveSession(response.token, userData);
         
         // Check if new user needs onboarding (no mobile number)
         if (!response.user.mobile) {
@@ -95,11 +115,12 @@ const Login = () => {
             state: { 
               user: userData,
               token: response.token 
-            } 
+            },
+            replace: true
           });
         } else {
           console.log('🎯 Existing user - navigating to dashboard...');
-          navigate('/dashboard');
+          navigate('/dashboard', { replace: true });
         }
       } else {
         console.error('❌ Backend verification FAILED:', response.message);

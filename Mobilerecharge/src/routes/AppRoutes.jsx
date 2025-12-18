@@ -18,13 +18,29 @@ import History from '../pages/payments/History';
 import Profile from '../pages/profile/Profile';
 
 const AppRoutes = () => {
-  // Simple auth check - in production, use proper authentication
-  const isAuthenticated = localStorage.getItem('authToken');
+  // Check authentication with token and user data
+  const isAuthenticated = () => {
+    const token = localStorage.getItem('authToken');
+    const user = localStorage.getItem('user');
+    return !!(token && user);
+  };
 
   const ProtectedRoute = ({ children }) => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated()) {
+      console.log('🔒 Protected route: Not authenticated, redirecting to login');
+      // Clear any stale data
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
       return <Navigate to="/login" replace />;
     }
+    
+    // Check if user has completed onboarding
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user.mobile && window.location.pathname !== '/onboarding') {
+      console.log('⚠️ User has no mobile, redirecting to onboarding');
+      return <Navigate to="/onboarding" replace />;
+    }
+    
     return (
       <>
         <Sidebar />
@@ -40,7 +56,14 @@ const AppRoutes = () => {
   };
 
   const AuthRoute = ({ children }) => {
-    if (isAuthenticated) {
+    if (isAuthenticated()) {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      // If user doesn't have mobile, send to onboarding
+      if (!user.mobile) {
+        console.log('✅ Authenticated but no mobile, redirecting to onboarding');
+        return <Navigate to="/onboarding" replace />;
+      }
+      console.log('✅ Already authenticated, redirecting to dashboard');
       return <Navigate to="/dashboard" replace />;
     }
     return children;
