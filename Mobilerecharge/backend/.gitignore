@@ -1,0 +1,6 @@
+# Environment variables for backend
+
+node_modules
+.env
+*.log
+.DS_Store
