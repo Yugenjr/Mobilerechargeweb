@@ -16,8 +16,11 @@ export default defineConfig({
   },
   preview: {
     port: 3004,
+    // Enable SPA fallback for preview
+    strictPort: false,
   },
   server: {
     port: 5173,
   },
+  publicDir: 'public',
 })

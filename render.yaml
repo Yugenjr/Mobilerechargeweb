@@ -2,11 +2,19 @@ services:
   # Frontend Service
   - type: web
     name: recharge-frontend-c525
-    runtime: node
+    runtime: static
     region: singapore
     plan: free
     buildCommand: cd Mobilerecharge && npm install && npm run build
     staticPublishPath: ./Mobilerecharge/dist
+    pullRequestPreviewsEnabled: true
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
     routes:
       - type: rewrite
         source: /*
