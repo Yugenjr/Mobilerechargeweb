@@ -156,8 +156,8 @@ export const getPrimarySim = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      sim: {
-        id: primarySim._id,
+      data: {
+        _id: primarySim._id,
         mobileNumber: primarySim.mobileNumber,
         operator: primarySim.operator,
         isPrimary: primarySim.isPrimary
@@ -180,7 +180,7 @@ export const getPrimarySim = async (req, res) => {
 export const createRecharge = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { simId, amount, rechargeType, friendMobile } = req.body;
+    const { simId, planId, amount, rechargeType, friendMobile } = req.body;
 
     if (rechargeType === 'self' && simId) {
       // Verify SIM belongs to user
@@ -193,10 +193,22 @@ export const createRecharge = async (req, res) => {
       }
     }
 
+    // Verify plan exists
+    if (planId) {
+      const plan = await Plan.findById(planId);
+      if (!plan) {
+        return res.status(404).json({
+          success: false,
+          message: 'Plan not found'
+        });
+      }
+    }
+
     // Create payment record
     const payment = await Payment.create({
       userId,
       simId: rechargeType === 'self' ? simId : null,
+      planId,
       amount,
       rechargeType,
       friendMobile: rechargeType === 'friend' ? friendMobile : null,

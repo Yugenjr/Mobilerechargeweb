@@ -17,6 +17,22 @@ const RechargeNew = () => {
 
   const operators = ['Jio', 'Airtel', 'Vi', 'BSNL'];
 
+  // Auto-detect operator from mobile number
+  const detectOperator = (mobileNumber) => {
+    if (mobileNumber.length < 4) return '';
+    const prefix = parseInt(mobileNumber.substring(0, 4));
+    const jioPrefixes = [6000, 6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008, 6009, 7000, 7001, 7002, 7003, 7004, 7005, 7006, 7007, 7008, 7009, 8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009, 9000, 9001, 9002, 9003, 9004, 9005, 9006, 9007, 9008, 9009];
+    const airtelPrefixes = [6200, 6201, 6290, 7300, 7301, 7302, 7303, 7400, 7401, 7402, 8100, 8101, 8102, 8103, 8104, 8400, 8401, 8402, 8403, 8404, 9100, 9101, 9102, 9103, 9104, 9300, 9301, 9302, 9303, 9304];
+    const viPrefixes = [6300, 6301, 6302, 6303, 7500, 7501, 7502, 7503, 7600, 7601, 8200, 8201, 8202, 8203, 8500, 8501, 8502, 8503, 8600, 8601, 9200, 9201, 9202, 9203, 9500, 9501, 9502, 9503, 9600, 9601];
+    const bsnlPrefixes = [6100, 6101, 6102, 6103, 7700, 7701, 7702, 7703, 7800, 7801, 8300, 8301, 8302, 8303, 8700, 8701, 8702, 8703, 8800, 8801, 9400, 9401, 9402, 9403, 9700, 9701, 9702, 9703, 9800, 9801];
+    
+    if (jioPrefixes.includes(prefix)) return 'Jio';
+    if (airtelPrefixes.includes(prefix)) return 'Airtel';
+    if (viPrefixes.includes(prefix)) return 'Vi';
+    if (bsnlPrefixes.includes(prefix)) return 'BSNL';
+    return '';
+  };
+
   useEffect(() => {
     if (rechargeType === 'self') {
       fetchPrimarySim();
@@ -134,7 +150,19 @@ const RechargeNew = () => {
                     <input
                       type="tel"
                       value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '');
+                        setPhoneNumber(value);
+                        // Auto-detect operator when number is complete
+                        if (value.length === 10) {
+                          const detected = detectOperator(value);
+                          if (detected) {
+                            setOperator(detected);
+                          }
+                        } else {
+                          setOperator('');
+                        }
+                      }}
                       placeholder="Enter 10-digit mobile number"
                       className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 transition-colors"
                       maxLength="10"

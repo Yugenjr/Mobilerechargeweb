@@ -11,6 +11,10 @@ const paymentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Sim'
   },
+  planId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Plan'
+  },
   amount: {
     type: Number,
     required: true
