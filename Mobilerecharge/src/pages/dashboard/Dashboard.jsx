@@ -20,10 +20,18 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('authToken');
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+      
+      console.log('🔍 Fetching dashboard data...');
+      console.log('📍 API URL:', API_URL);
+      console.log('🎫 Token:', token ? 'Present' : 'Missing');
+      
       const response = await axios.get(`${API_URL}/api/dashboard`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 30000
       });
+
+      console.log('✅ Dashboard response:', response.data);
 
       if (response.data.success) {
         const { user, currentPlan, usage, sims } = response.data.data;
@@ -38,8 +46,29 @@ const Dashboard = () => {
         });
       }
     } catch (err) {
-      console.error('Dashboard fetch error:', err);
-      setError('Failed to load dashboard data');
+      console.error('❌ Dashboard fetch error:', err);
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
+      
+      // Use fallback data from localStorage
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      if (storedUser.name || storedUser.email) {
+        console.log('📦 Using fallback data from localStorage');
+        setUserData({
+          name: storedUser.name || storedUser.email || 'User',
+          mobile: storedUser.mobile || 'Not set',
+          plan: 'No Active Plan',
+          dataUsed: 0,
+          dataTotal: 100,
+          validity: 'N/A',
+          balance: 0
+        });
+      } else {
+        setError('Failed to load dashboard data. Please try logging in again.');
+      }
     } finally {
       setLoading(false);
     }
