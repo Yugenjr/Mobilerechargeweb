@@ -21,8 +21,6 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    // Enable SPA fallback for dev server
-    historyApiFallback: true,
   },
   publicDir: 'public',
 })
