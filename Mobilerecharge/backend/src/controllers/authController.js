@@ -115,7 +115,10 @@ export const updateUserMobile = async (req, res) => {
     const { mobile } = req.body;
     const userId = req.user.userId; // From JWT middleware
 
+    console.log('📱 Update mobile request:', { userId, mobile });
+
     if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
+      console.error('❌ Invalid mobile number:', mobile);
       return res.status(400).json({
         success: false,
         message: 'Invalid mobile number'
@@ -124,14 +127,17 @@ export const updateUserMobile = async (req, res) => {
 
     const user = await User.findById(userId);
     if (!user) {
+      console.error('❌ User not found:', userId);
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
     }
 
+    console.log('👤 Found user:', user.email);
     user.mobile = mobile;
     await user.save();
+    console.log('💾 User mobile saved');
 
     // Detect operator from mobile number
     const detectOperator = (mobileNumber) => {
@@ -167,6 +173,7 @@ export const updateUserMobile = async (req, res) => {
 
     res.status(200).json({
       success: true,
+      message: 'Mobile number updated successfully',
       user: {
         email: user.email,
         name: user.name,

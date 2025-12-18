@@ -31,30 +31,47 @@ const Onboarding = () => {
     setError('');
     
     try {
+      console.log('📱 Onboarding: Updating mobile number:', mobile);
+      console.log('👤 User:', user?.email);
+      console.log('🎫 Token:', token ? 'Present' : 'Missing');
+      
       // Update user with mobile number
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+      console.log('🌐 API URL:', API_URL);
+      
       const response = await axios.post(
         `${API_URL}/api/users/update-mobile`,
         { mobile },
         {
           headers: {
             Authorization: `Bearer ${token}`
-          }
+          },
+          timeout: 30000
         }
       );
+      
+      console.log('✅ Update mobile response:', response.data);
       
       if (response.data.success) {
         // Update stored user info
         const updatedUser = { ...user, mobile };
         localStorage.setItem('user', JSON.stringify(updatedUser));
+        console.log('💾 User info updated in localStorage');
+        console.log('🎯 Navigating to dashboard...');
         
         // Navigate to dashboard
-        navigate('/dashboard');
+        navigate('/dashboard', { replace: true });
       } else {
+        console.error('❌ API returned success:false');
         setError(response.data.message || 'Failed to update mobile number');
       }
     } catch (err) {
-      console.error('Onboarding error:', err);
+      console.error('❌ Onboarding error:', err);
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
       setError(err.response?.data?.message || 'Failed to update mobile number. Please try again.');
     } finally {
       setLoading(false);
