@@ -10,4 +10,15 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+  },
+  preview: {
+    port: 3004,
+  },
+  server: {
+    port: 5173,
+    historyApiFallback: true,
+  },
 })

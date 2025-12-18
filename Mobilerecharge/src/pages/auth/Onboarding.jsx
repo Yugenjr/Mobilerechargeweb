@@ -13,8 +13,13 @@ const Onboarding = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get user data from navigation state
-  const { user, token } = location.state || {};
+  // Get user data from navigation state or localStorage
+  const stateData = location.state || {};
+  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const storedToken = localStorage.getItem('authToken');
+  
+  const user = stateData.user || storedUser;
+  const token = stateData.token || storedToken;
 
   const handleSubmit = async () => {
     if (mobile.length !== 10) {
@@ -56,8 +61,17 @@ const Onboarding = () => {
     }
   };
 
-  if (!user || !token) {
-    navigate('/login');
+  // If no user email or token, redirect to login
+  if (!user?.email || !token) {
+    console.log('⚠️ Onboarding: Missing auth data, redirecting to login');
+    navigate('/login', { replace: true });
+    return null;
+  }
+  
+  // If user already has mobile, skip onboarding
+  if (user.mobile) {
+    console.log('✅ User already has mobile, redirecting to dashboard');
+    navigate('/dashboard', { replace: true });
     return null;
   }
 
