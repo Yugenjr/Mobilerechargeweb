@@ -5,7 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
 const api = axios.create({
   baseURL: `${API_BASE_URL}/api`,
-  timeout: 10000,
+  timeout: 30000, // Increased to 30 seconds for cold starts on Render
   headers: {
     'Content-Type': 'application/json',
   }
@@ -52,14 +52,26 @@ export const verifyFirebaseToken = async (firebaseToken, mobile) => {
 
 export const verifyGoogleAuth = async (firebaseToken, email, name, uid) => {
   try {
+    console.log('🌐 API Call: /auth/google-signin');
+    console.log('📍 Backend URL:', API_BASE_URL);
     const response = await api.post('/auth/google-signin', { 
       firebaseToken,
       email,
       name,
       uid
     });
+    console.log('✅ API Response received:', response);
     return response;
   } catch (error) {
+    console.error('❌ API Error:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      code: error.code
+    });
+    if (error.code === 'ECONNABORTED') {
+      throw new Error('Backend server is starting up. Please wait a moment and try again.');
+    }
     throw error.response?.data || error;
   }
 };
