@@ -22,6 +22,15 @@ const Onboarding = () => {
   const user = stateData.user || storedUser;
   const token = stateData.token || storedToken;
 
+  console.log('🎬 Onboarding component mounted');
+  console.log('📍 Location state:', location.state);
+  console.log('👤 User from state:', stateData.user);
+  console.log('👤 User from localStorage:', storedUser);
+  console.log('🎫 Token from state:', stateData.token ? 'Present' : 'Missing');
+  console.log('🎫 Token from localStorage:', storedToken ? 'Present' : 'Missing');
+  console.log('✅ Final user:', user);
+  console.log('✅ Final token:', token ? 'Present' : 'Missing');
+
   const handleSubmit = async () => {
     if (mobile.length !== 10) {
       setError('Please enter a valid 10-digit mobile number');
@@ -35,10 +44,14 @@ const Onboarding = () => {
       console.log('📱 Onboarding: Updating mobile number:', mobile);
       console.log('👤 User:', user?.email);
       console.log('🎫 Token:', token ? 'Present' : 'Missing');
+      console.log('🎫 Token value (first 20 chars):', token?.substring(0, 20));
       
       // Update user with mobile number
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
       console.log('🌐 API URL:', API_URL);
+      console.log('🌐 Full endpoint:', `${API_URL}/api/users/update-mobile`);
+      console.log('📦 Request payload:', { mobile });
+      console.log('📋 Request headers:', { Authorization: `Bearer ${token?.substring(0, 20)}...` });
       
       const response = await axios.post(
         `${API_URL}/api/users/update-mobile`,
@@ -51,7 +64,8 @@ const Onboarding = () => {
         }
       );
       
-      console.log('✅ Update mobile response:', response.data);
+      console.log('✅ Update mobile response status:', response.status);
+      console.log('✅ Update mobile response data:', response.data);
       
       if (response.data.success) {
         // Update session with new mobile info using session manager
@@ -91,9 +105,18 @@ const Onboarding = () => {
     }
   };
 
+  // If user already has mobile, redirect to dashboard
+  if (user?.mobile) {
+    console.log('✅ User already has mobile number, redirecting to dashboard');
+    navigate('/dashboard', { replace: true });
+    return null;
+  }
+
   // If no user email or token, redirect to login
   if (!user?.email || !token) {
     console.log('⚠️ Onboarding: Missing auth data, redirecting to login');
+    console.log('Missing user email:', !user?.email);
+    console.log('Missing token:', !token);
     navigate('/login', { replace: true });
     return null;
   }
