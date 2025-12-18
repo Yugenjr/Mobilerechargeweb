@@ -87,6 +87,14 @@ const PlansNew = () => {
       }
     } catch (err) {
       console.error('❌ Recharge failed:', err);
+      setError(err.response?.data?.message || 'Recharge failed. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <Loader />
       </div>
