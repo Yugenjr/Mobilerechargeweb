@@ -10,11 +10,10 @@ services:
     pullRequestPreviewsEnabled: true
     headers:
       - path: /*
-        name: X-Frame-Options
-        value: SAMEORIGIN
-      - path: /*
         name: X-Content-Type-Options
         value: nosniff
+      # COOP header removed - it blocks Firebase signInWithPopup
+      # Firebase needs popup communication which COOP blocks
     routes:
       - type: rewrite
         source: /*
