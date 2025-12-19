@@ -1,10 +1,13 @@
 import express from 'express';
-import { getDashboardData, getPlans, getPrimarySim, createRecharge } from '../controllers/dashboardController.js';
+import { getDashboardData, getDashboardDataByUid, getPlans, getPrimarySim, createRecharge } from '../controllers/dashboardController.js';
 import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// GET /api/dashboard - Get user dashboard data (protected)
+// GET /api/dashboard/:uid - Get user dashboard data by UID (public)
+router.get('/dashboard/:uid', getDashboardDataByUid);
+
+// GET /api/dashboard - Get user dashboard data (protected - legacy)
 router.get('/dashboard', authenticate, getDashboardData);
 
 // GET /api/plans/:operator - Get plans by operator (protected)

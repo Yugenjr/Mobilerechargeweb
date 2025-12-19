@@ -83,48 +83,56 @@ const Login = () => {
       const firebaseToken = await user.getIdToken();
       console.log('✅ Step 2 SUCCESS: Got Firebase token (length:', firebaseToken.length, ')');
       
-      console.log('🔐 Step 3: Verifying with backend...');
-      // Step 3: Verify with backend
-      const response = await verifyGoogleAuth(
-        firebaseToken,
-        user.email,
-        user.displayName,
-        user.uid
-      );
-      console.log('✅ Step 3 SUCCESS: Backend response:', response);
+      console.log('� Step 3: Checking if user exists in database...');
+      // Step 3: Check if user exists
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
       
-      if (response.success) {
-        console.log('💾 Storing auth token and user info in localStorage');
-        // Store backend token and user info
-        localStorage.setItem('authToken', response.token);
-        const userData = {
-          email: user.email,
-          name: user.displayName,
-          photo: user.photoURL,
+      const checkResponse = await fetch(`${API_URL}/api/auth/check-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
           uid: user.uid,
-          mobile: response.user.mobile
-        };
-        
-        // Save session using session manager
-        saveSession(response.token, userData);
-        
-        // Check if new user needs onboarding (no mobile number)
-        if (!response.user.mobile) {
-          console.log('🆕 New user - redirecting to onboarding...');
-          navigate('/onboarding', { 
-            state: { 
-              user: userData,
-              token: response.token 
-            },
-            replace: true
-          });
-        } else {
-          console.log('🎯 Existing user - navigating to dashboard...');
-          navigate('/dashboard', { replace: true });
-        }
+          email: user.email,
+          name: user.displayName
+        })
+      });
+
+      const checkData = await checkResponse.json();
+      console.log('✅ Step 3 SUCCESS: Check user response:', checkData);
+
+      if (!checkData.success) {
+        console.error('❌ Check user failed:', checkData.message);
+        setError(checkData.message || 'Failed to verify user');
+        return;
+      }
+
+      // Save user data in session
+      const userData = {
+        uid: user.uid,
+        email: user.email,
+        name: user.displayName,
+        photo: user.photoURL,
+        mobile: checkData.user?.mobile || null
+      };
+      
+      console.log('💾 Saving user session...');
+      saveSession(firebaseToken, userData);
+
+      if (checkData.isNewUser) {
+        console.log('🆕 New user detected - redirecting to onboarding...');
+        navigate('/onboarding', { 
+          state: { 
+            uid: user.uid,
+            email: user.email,
+            name: user.displayName
+          },
+          replace: true
+        });
       } else {
-        console.error('❌ Backend verification FAILED:', response.message);
-        setError(response.message || 'Failed to authenticate with backend');
+        console.log('✅ Existing user found - navigating to dashboard...');
+        navigate('/dashboard', { replace: true });
       }
     } catch (err) {
       console.error('❌ GOOGLE SIGN-IN ERROR:');

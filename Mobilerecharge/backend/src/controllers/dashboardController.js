@@ -5,7 +5,104 @@ import Payment from '../models/Payment.js';
 import UsageStats from '../models/UsageStats.js';
 
 /**
- * Get user dashboard data
+ * Get user dashboard data by UID
+ * GET /api/dashboard/:uid
+ */
+export const getDashboardDataByUid = async (req, res) => {
+  try {
+    const { uid } = req.params;
+
+    console.log('📊 Fetching dashboard for UID:', uid);
+
+    // Get user by Firebase UID
+    const user = await User.findOne({ firebaseUid: uid });
+    if (!user) {
+      console.error('❌ User not found for UID:', uid);
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    console.log('✅ User found:', user.email);
+
+    // Get user's SIMs
+    const sims = await Sim.find({ userId: user._id, isActive: true });
+    console.log('📱 SIMs found:', sims.length);
+
+    // Get primary SIM or first SIM
+    const primarySim = sims.find(sim => sim.isPrimary) || sims[0];
+
+    let currentPlan = null;
+    let usageStats = null;
+
+    if (primarySim) {
+      // Get current plan for primary SIM
+      const plans = await Plan.find({ simId: primarySim._id, isActive: true }).limit(1);
+      currentPlan = plans[0];
+
+      // Get usage stats for primary SIM
+      usageStats = await UsageStats.findOne({ userId: user._id, simId: primarySim._id });
+    }
+
+    // Get recent payments
+    const recentPayments = await Payment.find({ userId: user._id })
+      .sort({ date: -1 })
+      .limit(5);
+
+    console.log('✅ Dashboard data prepared successfully');
+
+    res.status(200).json({
+      success: true,
+      data: {
+        user: {
+          uid: user.firebaseUid,
+          name: user.name,
+          email: user.email,
+          mobile: user.mobile || primarySim?.mobileNumber
+        },
+        sims: sims.map(sim => ({
+          id: sim._id,
+          mobileNumber: sim.mobileNumber,
+          operator: sim.operator,
+          isPrimary: sim.isPrimary
+        })),
+        currentPlan: currentPlan ? {
+          name: currentPlan.name,
+          price: currentPlan.price,
+          validity: currentPlan.validity,
+          benefits: currentPlan.benefits
+        } : null,
+        usage: usageStats ? {
+          dataUsed: usageStats.dataUsed,
+          dataTotal: usageStats.dataTotal,
+          callsUsed: usageStats.callsUsed,
+          smsUsed: usageStats.smsUsed
+        } : {
+          dataUsed: 0,
+          dataTotal: 100,
+          callsUsed: 0,
+          smsUsed: 0
+        },
+        recentPayments: recentPayments.map(payment => ({
+          id: payment._id,
+          amount: payment.amount,
+          date: payment.date,
+          status: payment.status
+        }))
+      }
+    });
+  } catch (error) {
+    console.error('❌ Dashboard error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch dashboard data'
+    });
+  }
+};
+
+/**
+ * Get user dashboard data (legacy - JWT based)
  * GET /api/dashboard
  */
 export const getDashboardData = async (req, res) => {

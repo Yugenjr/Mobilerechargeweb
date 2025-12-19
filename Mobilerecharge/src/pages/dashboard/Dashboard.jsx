@@ -19,15 +19,21 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const uid = storedUser.uid;
+
+      if (!uid) {
+        console.error('❌ No UID found, redirecting to login');
+        navigate('/login', { replace: true });
+        return;
+      }
+
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
       
-      console.log('🔍 Fetching dashboard data...');
+      console.log('🔍 Fetching dashboard data for UID:', uid);
       console.log('📍 API URL:', API_URL);
-      console.log('🎫 Token:', token ? 'Present' : 'Missing');
       
-      const response = await axios.get(`${API_URL}/api/dashboard`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await axios.get(`${API_URL}/api/dashboard/${uid}`, {
         timeout: 30000
       });
 

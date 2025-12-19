@@ -41,31 +41,41 @@ const Onboarding = () => {
     setError('');
     
     try {
-      console.log('📱 Onboarding: Updating mobile number:', mobile);
-      console.log('👤 User:', user?.email);
-      console.log('🎫 Token:', token ? 'Present' : 'Missing');
-      console.log('🎫 Token value (first 20 chars):', token?.substring(0, 20));
+      console.log('📱 Onboarding: Submitting mobile number:', mobile);
       
-      // Update user with mobile number
+      // Get user data from location state or localStorage
+      const uid = stateData.uid || storedUser.uid;
+      const email = stateData.email || storedUser.email;
+      const name = stateData.name || storedUser.name;
+
+      if (!uid || !email) {
+        setError('Missing user information. Please login again.');
+        navigate('/login', { replace: true });
+        return;
+      }
+
+      console.log('👤 User UID:', uid);
+      console.log('📧 User email:', email);
+      
+      // Submit onboarding data
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
       console.log('🌐 API URL:', API_URL);
-      console.log('🌐 Full endpoint:', `${API_URL}/api/users/update-mobile`);
-      console.log('📦 Request payload:', { mobile });
-      console.log('📋 Request headers:', { Authorization: `Bearer ${token?.substring(0, 20)}...` });
+      console.log('📦 Request payload:', { uid, email, name, mobileNumber: mobile });
       
       const response = await axios.post(
-        `${API_URL}/api/users/update-mobile`,
-        { mobile },
+        `${API_URL}/api/onboarding`,
+        { 
+          uid,
+          email,
+          name,
+          mobileNumber: mobile
+        },
         {
-          headers: {
-            Authorization: `Bearer ${token}`
-          },
           timeout: 30000
         }
       );
       
-      console.log('✅ Update mobile response status:', response.status);
-      console.log('✅ Update mobile response data:', response.data);
+      console.log('✅ Onboarding response:', response.data);
       
       if (response.data.success) {
         // Update session with new mobile info using session manager
@@ -78,7 +88,7 @@ const Onboarding = () => {
         navigate('/dashboard', { replace: true });
       } else {
         console.error('❌ API returned success:false');
-        setError(response.data.message || 'Failed to update mobile number');
+        setError(response.data.message || 'Failed to complete onboarding');
       }
     } catch (err) {
       console.error('❌ Onboarding error:', err);
@@ -91,14 +101,8 @@ const Onboarding = () => {
       // Handle network errors
       if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
         setError('Request timed out. Please check your connection and try again.');
-      } else if (err.response?.status === 401) {
-        setError('Session expired. Please login again.');
-        // Clear stale auth
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        setTimeout(() => navigate('/login', { replace: true }), 2000);
       } else {
-        setError(err.response?.data?.message || 'Failed to update mobile number. Please try again.');
+        setError(err.response?.data?.message || 'Failed to complete onboarding. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -112,11 +116,11 @@ const Onboarding = () => {
     return null;
   }
 
-  // If no user email or token, redirect to login
-  if (!user?.email || !token) {
-    console.log('⚠️ Onboarding: Missing auth data, redirecting to login');
-    console.log('Missing user email:', !user?.email);
-    console.log('Missing token:', !token);
+  // Check if we have required user data (uid and email)
+  const hasRequiredData = (stateData.uid || storedUser.uid) && (stateData.email || storedUser.email);
+  
+  if (!hasRequiredData) {
+    console.log('⚠️ Onboarding: Missing required user data, redirecting to login');
     navigate('/login', { replace: true });
     return null;
   }
