@@ -22,6 +22,18 @@ services:
     envVars:
       - key: VITE_API_URL
         value: https://mobilerechargeweb.onrender.com
+      - key: VITE_FIREBASE_API_KEY
+        value: AIzaSyCMDooo-DQY4VeukK49nn0N6hFCTQvqBtY
+      - key: VITE_FIREBASE_AUTH_DOMAIN
+        value: event-horizon-9sr6w.firebaseapp.com
+      - key: VITE_FIREBASE_PROJECT_ID
+        value: event-horizon-9sr6w
+      - key: VITE_FIREBASE_STORAGE_BUCKET
+        value: event-horizon-9sr6w.firebasestorage.app
+      - key: VITE_FIREBASE_MESSAGING_SENDER_ID
+        value: 149097918186
+      - key: VITE_FIREBASE_APP_ID
+        value: 1:149097918186:web:bb3d7f410cea389e677193
       - key: NODE_ENV
         value: production
         
@@ -38,5 +50,11 @@ services:
         value: production
       - key: PORT
         value: 5002
+      - key: MONGODB_URI
+        value: mongodb+srv://yugenjr847:yugen842007@yugen.zbssgmq.mongodb.net/mobilerecharge
+      - key: JWT_SECRET
+        value: your-super-secret-jwt-key-change-this-in-production-12345
+      - key: FIREBASE_PROJECT_ID
+        value: event-horizon-9sr6w
       - key: ALLOWED_ORIGINS
         value: http://localhost:3004,http://localhost:5173,https://recharge-frontend-c525.onrender.com
