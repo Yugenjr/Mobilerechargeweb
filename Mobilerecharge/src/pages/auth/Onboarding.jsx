@@ -63,7 +63,7 @@ const Onboarding = () => {
       console.log('📦 Request payload:', { uid, email, name, mobileNumber: mobile });
       
       const response = await axios.post(
-        `${API_URL}/api/onboarding`,
+        `${API_URL}/api/auth/onboarding`,
         { 
           uid,
           email,
