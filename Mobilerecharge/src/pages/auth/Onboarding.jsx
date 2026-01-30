@@ -74,7 +74,7 @@ const Onboarding = () => {
           headers: {
             'Authorization': `Bearer ${token}`
           },
-          timeout: 30000
+          timeout: 60000
         }
       );
 
@@ -103,7 +103,7 @@ const Onboarding = () => {
 
       // Handle network errors
       if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
-        setError('Request timed out. Please check your connection and try again.');
+        setError('Request timed out. The server might be waking up, please try again.');
       }
       // Handle "User already exists" specifically
       else if (err.response?.status === 400 && err.response?.data?.message === 'User already exists') {
@@ -227,6 +227,12 @@ const Onboarding = () => {
             >
               {loading ? 'Setting up...' : 'Continue to Dashboard'}
             </Button>
+
+            {loading && (
+              <p className="text-center text-xs text-yellow-400 mt-2 animate-pulse">
+                This might take up to a minute if the server is waking up...
+              </p>
+            )}
           </div>
         </Card>
       </motion.div>

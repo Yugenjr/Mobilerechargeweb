@@ -5,13 +5,17 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
     match: /^[0-9]{10}$/,
-    sparse: true // Allow multiple null values
+    sparse: true, // Allow multiple null values
+    unique: true,
+    index: true
   },
   email: {
     type: String,
     trim: true,
     lowercase: true,
-    sparse: true // Allow multiple null values
+    sparse: true, // Allow multiple null values
+    unique: true,
+    index: true
   },
   name: {
     type: String,
@@ -20,7 +24,9 @@ const userSchema = new mongoose.Schema({
   firebaseUid: {
     type: String,
     trim: true,
-    sparse: true
+    sparse: true,
+    unique: true,
+    index: true
   },
   createdAt: {
     type: Date,
@@ -29,7 +35,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Ensure at least one identifier exists
-userSchema.pre('save', function(next) {
+userSchema.pre('save', function (next) {
   if (!this.mobile && !this.email) {
     next(new Error('User must have either mobile or email'));
   } else {
