@@ -104,7 +104,15 @@ const Onboarding = () => {
       // Handle network errors
       if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
         setError('Request timed out. Please check your connection and try again.');
-      } else {
+      }
+      // Handle "User already exists" specifically
+      else if (err.response?.status === 400 && err.response?.data?.message === 'User already exists') {
+        console.log('⚠️ User already exists, redirecting to dashboard...');
+        // Ensure we have user data in storage/session before redirecting
+        updateSessionUser({ mobile }); // Optimistically update if needed, or just redirect
+        navigate('/dashboard', { replace: true });
+      }
+      else {
         setError(err.response?.data?.message || 'Failed to complete onboarding. Please try again.');
       }
     } finally {

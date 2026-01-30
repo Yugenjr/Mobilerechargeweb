@@ -29,10 +29,10 @@ const Dashboard = () => {
       }
 
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
-      
+
       console.log('🔍 Fetching dashboard data for UID:', uid);
       console.log('📍 API URL:', API_URL);
-      
+
       const response = await axios.get(`${API_URL}/api/dashboard/${uid}`, {
         timeout: 30000
       });
@@ -50,7 +50,7 @@ const Dashboard = () => {
           dataUsed: usage?.dataUsed || 0,
           dataTotal: usage?.dataTotal || 100,
           validity: currentPlan?.validity || 'N/A',
-          balance: 150
+          balance: 0
         });
       }
     } catch (err) {
@@ -60,23 +60,8 @@ const Dashboard = () => {
         response: err.response?.data,
         status: err.response?.status
       });
-      
-      // Use fallback data from localStorage
-      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-      if (storedUser.name || storedUser.email) {
-        console.log('📦 Using fallback data from localStorage');
-        setUserData({
-          name: storedUser.name || storedUser.email || 'User',
-          mobile: storedUser.mobile || 'Not set',
-          plan: 'No Active Plan',
-          dataUsed: 0,
-          dataTotal: 100,
-          validity: 'N/A',
-          balance: 0
-        });
-      } else {
-        setError('Failed to load dashboard data. Please try logging in again.');
-      }
+
+      setError(err.response?.data?.message || 'Failed to load dashboard data. Please try logging in again.');
     } finally {
       setLoading(false);
     }
@@ -167,7 +152,7 @@ const Dashboard = () => {
             Active
           </span>
         </div>
-        
+
         <div className="space-y-4">
           <div>
             <div className="flex justify-between items-center mb-2">
@@ -212,7 +197,7 @@ const Dashboard = () => {
           <h3 className="text-xl font-bold text-white">Exclusive Offers</h3>
           <button className="text-neon-blue text-sm font-semibold">View All</button>
         </div>
-        
+
         <div className="grid md:grid-cols-3 gap-4">
           {offers.map((offer, index) => (
             <motion.div
