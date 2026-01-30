@@ -13,12 +13,12 @@ const Onboarding = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Get user data from navigation state or localStorage
   const stateData = location.state || {};
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
   const storedToken = localStorage.getItem('authToken');
-  
+
   const user = stateData.user || storedUser;
   const token = stateData.token || storedToken;
 
@@ -36,13 +36,13 @@ const Onboarding = () => {
       setError('Please enter a valid 10-digit mobile number');
       return;
     }
-    
+
     setLoading(true);
     setError('');
-    
+
     try {
       console.log('📱 Onboarding: Submitting mobile number:', mobile);
-      
+
       // Get user data from location state or localStorage
       const uid = stateData.uid || storedUser.uid;
       const email = stateData.email || storedUser.email;
@@ -56,34 +56,37 @@ const Onboarding = () => {
 
       console.log('👤 User UID:', uid);
       console.log('📧 User email:', email);
-      
+
       // Submit onboarding data
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
       console.log('🌐 API URL:', API_URL);
       console.log('📦 Request payload:', { uid, email, name, mobileNumber: mobile });
-      
+
       const response = await axios.post(
         `${API_URL}/api/auth/onboarding`,
-        { 
+        {
           uid,
           email,
           name,
           mobileNumber: mobile
         },
         {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
           timeout: 30000
         }
       );
-      
+
       console.log('✅ Onboarding response:', response.data);
-      
+
       if (response.data.success) {
         // Update session with new mobile info using session manager
         updateSessionUser({ mobile });
         console.log('💾 User info updated in session');
         console.log('✅ Onboarding complete!');
         console.log('🎯 Navigating to dashboard...');
-        
+
         // Navigate to dashboard
         navigate('/dashboard', { replace: true });
       } else {
@@ -97,7 +100,7 @@ const Onboarding = () => {
         response: err.response?.data,
         status: err.response?.status
       });
-      
+
       // Handle network errors
       if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
         setError('Request timed out. Please check your connection and try again.');
@@ -118,13 +121,13 @@ const Onboarding = () => {
 
   // Check if we have required user data (uid and email)
   const hasRequiredData = (stateData.uid || storedUser.uid) && (stateData.email || storedUser.email);
-  
+
   if (!hasRequiredData) {
     console.log('⚠️ Onboarding: Missing required user data, redirecting to login');
     navigate('/login', { replace: true });
     return null;
   }
-  
+
   // If user already has mobile, skip onboarding
   if (user.mobile) {
     console.log('✅ User already has mobile, redirecting to dashboard');
@@ -173,13 +176,13 @@ const Onboarding = () => {
           </div>
 
           <h2 className="text-xl font-bold text-white mb-4">Add Mobile Number</h2>
-          
+
           {error && (
             <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
               {error}
             </div>
           )}
-          
+
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
