@@ -331,3 +331,86 @@ export const createRecharge = async (req, res) => {
     });
   }
 };
+
+/**
+ * Seed plans into database
+ * GET /api/seed-plans
+ */
+export const seedPlans = async (req, res) => {
+  try {
+    const plans = [
+      // JIO PLANS
+      // Popular
+      { operator: 'Jio', name: 'Jio 239', price: 239, validity: '28 Days', benefits: { data: '1.5 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Popular', popular: true },
+      { operator: 'Jio', name: 'Jio 299', price: 299, validity: '28 Days', benefits: { data: '2 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Popular', popular: true },
+      { operator: 'Jio', name: 'Jio 666', price: 666, validity: '84 Days', benefits: { data: '1.5 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Popular', popular: true },
+      { operator: 'Jio', name: 'Jio 719', price: 719, validity: '84 Days', benefits: { data: '2 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Popular', popular: true },
+      { operator: 'Jio', name: 'Jio 2999', price: 2999, validity: '365 Days', benefits: { data: '2.5 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Popular', popular: true },
+      // Data
+      { operator: 'Jio', name: 'Jio 15', price: 15, validity: 'Active Plan', benefits: { data: '1 GB', calls: 'NA', sms: 'NA' }, category: 'Data', popular: false },
+      { operator: 'Jio', name: 'Jio 25', price: 25, validity: 'Active Plan', benefits: { data: '2 GB', calls: 'NA', sms: 'NA' }, category: 'Data', popular: false },
+      { operator: 'Jio', name: 'Jio 61', price: 61, validity: 'Active Plan', benefits: { data: '6 GB', calls: 'NA', sms: 'NA' }, category: 'Data', popular: false },
+      { operator: 'Jio', name: 'Jio 121', price: 121, validity: 'Active Plan', benefits: { data: '12 GB', calls: 'NA', sms: 'NA' }, category: 'Data', popular: false },
+      { operator: 'Jio', name: 'Jio 222', price: 222, validity: 'Active Plan', benefits: { data: '50 GB', calls: 'NA', sms: 'NA' }, category: 'Data', popular: false },
+      // Unlimited (True 5G)
+      { operator: 'Jio', name: 'Jio 395', price: 395, validity: '84 Days', benefits: { data: '6 GB', calls: 'Unlimited', sms: '1000 Total' }, category: 'Unlimited', popular: false },
+      { operator: 'Jio', name: 'Jio 1559', price: 1559, validity: '336 Days', benefits: { data: '24 GB', calls: 'Unlimited', sms: '3600 Total' }, category: 'Unlimited', popular: false },
+      // Validity
+      { operator: 'Jio', name: 'Jio 155', price: 155, validity: '28 Days', benefits: { data: '2 GB', calls: 'Unlimited', sms: '300 Total' }, category: 'Validity', popular: false },
+
+      // AIRTEL PLANS
+      // Popular
+      { operator: 'Airtel', name: 'Airtel 239', price: 239, validity: '24 Days', benefits: { data: '1 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Popular', popular: true },
+      { operator: 'Airtel', name: 'Airtel 299', price: 299, validity: '28 Days', benefits: { data: '1.5 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Popular', popular: true },
+      { operator: 'Airtel', name: 'Airtel 479', price: 479, validity: '56 Days', benefits: { data: '1.5 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Popular', popular: true },
+      { operator: 'Airtel', name: 'Airtel 719', price: 719, validity: '84 Days', benefits: { data: '1.5 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Popular', popular: true },
+      { operator: 'Airtel', name: 'Airtel 1799', price: 1799, validity: '365 Days', benefits: { data: '24 GB', calls: 'Unlimited', sms: '3600 Total' }, category: 'Popular', popular: false },
+      // Data
+      { operator: 'Airtel', name: 'Airtel 19', price: 19, validity: '1 Day', benefits: { data: '1 GB', calls: 'NA', sms: 'NA' }, category: 'Data', popular: false },
+      { operator: 'Airtel', name: 'Airtel 58', price: 58, validity: 'Existing Plan', benefits: { data: '3 GB', calls: 'NA', sms: 'NA' }, category: 'Data', popular: false },
+      { operator: 'Airtel', name: 'Airtel 148', price: 148, validity: 'Existing Plan', benefits: { data: '15 GB', calls: 'NA', sms: 'NA' }, category: 'Data', popular: false },
+      // Unlimited
+      { operator: 'Airtel', name: 'Airtel 2999', price: 2999, validity: '365 Days', benefits: { data: '2 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Unlimited', popular: true },
+      // Validity
+      { operator: 'Airtel', name: 'Airtel 99', price: 99, validity: '28 Days', benefits: { data: '200 MB', calls: 'Rs 99 Talktime', sms: 'NA' }, category: 'Validity', popular: false },
+
+      // VI PLANS (Vodafone Idea)
+      // Popular
+      { operator: 'Vi', name: 'Vi 299', price: 299, validity: '28 Days', benefits: { data: '1.5 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Popular', popular: true },
+      { operator: 'Vi', name: 'Vi 479', price: 479, validity: '56 Days', benefits: { data: '1.5 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Popular', popular: true },
+      { operator: 'Vi', name: 'Vi 719', price: 719, validity: '84 Days', benefits: { data: '1.5 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Popular', popular: true },
+      // Data
+      { operator: 'Vi', name: 'Vi 19', price: 19, validity: '1 Day', benefits: { data: '1 GB', calls: 'NA', sms: 'NA' }, category: 'Data', popular: false },
+      { operator: 'Vi', name: 'Vi 39', price: 39, validity: 'Active Plan', benefits: { data: '3 GB', calls: 'NA', sms: 'NA' }, category: 'Data', popular: false },
+      // Unlimited Hero
+      { operator: 'Vi', name: 'Vi 2999', price: 2999, validity: '365 Days', benefits: { data: '850 GB', calls: 'Unlimited', sms: '100/day' }, category: 'Unlimited', popular: false },
+
+      // BSNL PLANS
+      // Popular
+      { operator: 'BSNL', name: 'BSNL 153', price: 153, validity: '26 Days', benefits: { data: '1 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Popular', popular: true },
+      { operator: 'BSNL', name: 'BSNL 199', price: 199, validity: '30 Days', benefits: { data: '2 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Popular', popular: true },
+      { operator: 'BSNL', name: 'BSNL 397', price: 397, validity: '150 Days', benefits: { data: '2 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Popular', popular: true },
+      { operator: 'BSNL', name: 'BSNL 1999', price: 1999, validity: '365 Days', benefits: { data: '600 GB', calls: 'Unlimited', sms: '100/day' }, category: 'Popular', popular: true },
+      // Validity
+      { operator: 'BSNL', name: 'BSNL 107', price: 107, validity: '35 Days', benefits: { data: '3 GB', calls: '200 Min', sms: 'NA' }, category: 'Validity', popular: false },
+      { operator: 'BSNL', name: 'BSNL 197', price: 197, validity: '70 Days', benefits: { data: '2 GB/day', calls: 'Unlimited', sms: '100/day' }, category: 'Validity', popular: false }
+    ];
+
+    await Plan.deleteMany({});
+    await Plan.insertMany(plans);
+
+    console.log(`✅ Seeded ${plans.length} plans successfully`);
+    res.status(200).json({
+      success: true,
+      message: `Seeded ${plans.length} plans`,
+      count: plans.length
+    });
+
+  } catch (error) {
+    console.error('❌ Seed plans error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};

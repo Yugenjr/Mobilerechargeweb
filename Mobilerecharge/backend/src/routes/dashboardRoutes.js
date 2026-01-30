@@ -1,5 +1,5 @@
 import express from 'express';
-import { getDashboardData, getDashboardDataByUid, getPlans, getPrimarySim, createRecharge } from '../controllers/dashboardController.js';
+import { getDashboardData, getDashboardDataByUid, getPlans, getPrimarySim, createRecharge, seedPlans } from '../controllers/dashboardController.js';
 import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -18,5 +18,8 @@ router.get('/sims/primary', authenticate, getPrimarySim);
 
 // POST /api/payments/recharge - Create recharge (protected)
 router.post('/payments/recharge', authenticate, createRecharge);
+
+// GET /api/seed-plans - Seed plans (public/debug)
+router.get('/seed-plans', seedPlans);
 
 export default router;
