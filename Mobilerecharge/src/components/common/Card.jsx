@@ -1,15 +1,15 @@
 import { motion } from 'framer-motion';
 
-const Card = ({ 
-  children, 
-  className = '', 
+const Card = ({
+  children,
+  className = '',
   hover = false,
   glow = false,
-  onClick 
+  onClick
 }) => {
-  const cardClass = hover ? 'glass-card-hover cursor-pointer' : 'glass-card';
-  const glowClass = glow ? 'card-glow' : '';
-  
+  const cardClass = hover ? 'premium-card-hover cursor-pointer' : 'premium-card';
+  const glowClass = '';
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

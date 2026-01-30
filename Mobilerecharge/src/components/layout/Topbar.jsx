@@ -5,33 +5,35 @@ const Topbar = () => {
   const [notifications] = useState(3);
 
   return (
-    <div className="lg:pl-64">
-      <div className="glass-card rounded-none border-b border-white/10 px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          <button className="lg:hidden text-gray-400 hover:text-white">
-            <Menu className="w-6 h-6" />
-          </button>
-          
-          <div className="flex-1 px-4">
-            <h1 className="text-xl font-semibold text-white">Welcome Back!</h1>
-            <p className="text-sm text-gray-400">Manage your recharges & plans</p>
-          </div>
+    <div className="lg:pl-64 flex flex-col">
+      <div className="sticky top-0 z-10 flex h-16 flex-shrink-0 items-center gap-x-4 border-b border-dark-border bg-dark-bg/80 px-4 shadow-sm backdrop-blur-md sm:gap-x-6 sm:px-6 lg:px-8">
+        <button className="lg:hidden -m-2.5 p-2.5 text-dark-text-secondary hover:text-dark-text-primary">
+          <Menu className="w-6 h-6" />
+        </button>
 
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
-                <Bell className="w-6 h-6" />
-                {notifications > 0 && (
-                  <span className="absolute top-0 right-0 w-5 h-5 bg-neon-pink text-white text-xs rounded-full flex items-center justify-center">
-                    {notifications}
-                  </span>
-                )}
-              </button>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-neon flex items-center justify-center font-bold">
-                JD
+        <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+          <div className="flex items-center gap-x-4 lg:gap-x-6 ml-auto">
+            {/* Notifications */}
+            <button className="relative -m-2.5 p-2.5 text-dark-text-secondary hover:text-dark-text-primary transition-colors">
+              <span className="sr-only">View notifications</span>
+              <Bell className="w-6 h-6" />
+              {notifications > 0 && (
+                <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-critical-red ring-2 ring-dark-bg" />
+              )}
+            </button>
+
+            {/* Separator */}
+            <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-dark-border" aria-hidden="true" />
+
+            {/* Profile */}
+            <div className="flex items-center gap-x-4 lg:gap-x-6">
+              <div className="flex items-center gap-x-3">
+                <div className="h-9 w-9 rounded-full bg-gradient-primary flex items-center justify-center text-sm font-bold text-white shadow-glow-sm">
+                  JD
+                </div>
+                <span className="hidden lg:flex lg:items-center">
+                  <span className="text-sm font-semibold leading-6 text-dark-text-primary" aria-hidden="true">John Doe</span>
+                </span>
               </div>
             </div>
           </div>
